@@ -34,6 +34,7 @@ export function chartDrawing(selected,filedIds=[]){
     <svg class="route-overlay" viewBox="0 0 720 480" aria-hidden="true" focusable="false">
       <g class="deck-floors">${Object.entries(BERTHS).map(([id,room])=>`<polygon class="bay-floor" data-action="floor" data-value="${id}" style="--signal:${room.color}" points="${room.floor}"/>`).join("")}</g>
       <path class="route-ink" d="${active.course}"/><path id="pilot-course" class="pilot-course" d="${active.course}"/>
+      <path class="service-path" fill="none" stroke="none" pointer-events="none"/>
       <g class="dispatch-token" transform="translate(${active.x} ${active.y})"><ellipse cx="-14" cy="-5" rx="16" ry="4" fill="#151123" opacity=".65"/><image href="./media/spool.webp" x="-35" y="-31" width="40" height="27"/></g>
     </svg>
     ${CASEBOOK.map((file,i)=>{
@@ -55,7 +56,7 @@ export function dispatchAcross(plan,previous,target){
     token.setAttribute("transform",`translate(${BERTHS[target].x} ${BERTHS[target].y})`);
     return;
   }
-  const path=document.createElementNS("http://www.w3.org/2000/svg","path");
+  const path=plan.querySelector(".service-path");
   path.setAttribute("d",travelBetween(previous,target));
   const length=path.getTotalLength(),duration=Math.max(450,Math.min(1450,length*2.8));
   let start;
