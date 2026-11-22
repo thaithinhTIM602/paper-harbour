@@ -6,7 +6,9 @@ Take the night shift on Relay Nine, a fictional orbital cargo station. Its six w
 
 ## On the cargo deck
 
-Select a room on the deck or use the previous and next bay controls. With a room focused, the arrow keys, Home and End work too. Open the selected case to begin. Ask Spool on the deck or at any workbench to hear a lead or jump to the matching exhibit.\n\n1. On the light table, drag the blue tally, use the keyboard slider or press **Square the sheets**. Select a cargo mark directly on the manifest to clip it. Open a survey photograph to move a magnifier over the print or turn it over for the case note.
+Select a room on the deck or use the previous and next bay controls. With a room focused, the arrow keys, Home and End work too. Open the selected case to begin. Ask Spool on the deck or at any workbench to hear a lead or jump to the matching exhibit.
+
+1. On the light table, drag the blue tally, use the keyboard slider or press **Square the sheets**. Select a cargo mark directly on the manifest to clip it. Open a survey photograph to move a magnifier over the print or turn it over for the case note.
 2. Work the exhibit and read the papers. Each file has its own instrument, from a salt test or temperature recorder to the captain’s order carbons. Keep up to four passages or readings with the cargo comparisons.
 3. Write the number of units to allow and review the calculated payment. A second action stamps the figures into the book.
 4. Read the audit, examine how a different policy clause changes the entitlement, and open return post in the cash ledger. Six signed summer rulings produce a closing newspaper and a printable bound casebook.
