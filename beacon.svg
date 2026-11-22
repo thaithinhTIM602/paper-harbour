@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<title>Tide Mutual harbour light</title>
+<circle cx="32" cy="32" r="30" fill="#1d3047"/>
+<g fill="#f8efd9">
+<path d="m24 18 8-6 8 6zm2 2h12v8H26zm0 10h12l4 17H22z"/>
+<path d="M28 31h8l1 5-11 3zm-15 16c6 1 7 5 14 3 5-2 7-2 12 0 4 2 7 0 12-2v3c-5 3-9 4-14 2s-7-1-11 0c-6 2-10 0-13-2z" />
+</g><g stroke="#ee6743" stroke-width="2"><path d="m22 23-12-1m12 5-9 3m29-7 12-1m-12 5 9 3"/></g><path fill="#1d3047" d="M30 21h4v6h-4zm-4 18 11-4 1 4-13 4z"/>
+</svg>
+

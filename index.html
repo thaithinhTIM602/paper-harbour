@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6eedb">
+  <meta name="description" content="Work the summer casebook at Tide Mutual, a fictional 1962 marine insurance office. Six cargo mysteries, a light table and a ledger in your hands.">
+  <meta property="og:title" content="Paper Harbour · The summer casebook">
+  <meta property="og:description" content="Six cargo mysteries at a fictional 1962 port. Inspect the records and decide who pays.">
+  <meta property="og:image" content="https://thaithinhtim602.github.io/paper-harbour/media/cover.webp">
+  <title>Paper Harbour · The summer casebook</title>
+  <link rel="icon" href="./beacon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./printshop.css">
+  <link rel="stylesheet" href="./instruments.css">
+  <link rel="preload" as="image" href="./media/cover.webp" fetchpriority="high">
+</head>
+<body>
+  <a class="skip" href="#main-desk">Skip to the desk</a>
+  <header class="mast"><div class="mast-inner">
+    <a class="brand" href="#cover" aria-label="Tide Mutual home"><img src="./beacon.svg" alt="" width="39" height="39"><span>Tide Mutual<small>MARINE ASSURANCE</small></span></a>
+    <nav aria-label="Office rooms"><a href="#register">Casebook</a><a href="#ledger">Ledger</a><a href="#wire">Wire room</a><a class="guide-link" href="#guide">How to play</a></nav>
+  </div></header>
+  <main id="main-desk" tabindex="-1"><noscript>Paper Harbour needs JavaScript to work the light table and file a ruling.</noscript></main>
+  <footer class="imprint"><div><span>Tide Mutual</span><span>Paper Harbour · A fictional port, 1962</span></div><a href="#guide" class="footer-guide">Desk guide</a><button data-action="sound" id="sound-toggle" aria-pressed="false">Desk sounds off</button></footer>
+  <dialog id="office-dialog" aria-labelledby="dialog-title"></dialog>
+  <div id="announcement" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script type="module" src="./app.mjs"></script>
+</body></html>
+
