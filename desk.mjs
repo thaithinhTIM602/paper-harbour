@@ -24,26 +24,31 @@ export function caseRoom(state,file,step,docId="exhibit",whatIf=false,setting={}
   else body=lightTable(file,draft,Boolean(entry));
   return `<section class="case-room wrap" aria-label="${label}">
     <a class="backlink" href="${href}">← ${file.wire?"Wire room":"Case register"}</a>
-    <div class="file-heading"><div><p class="eyeline">${marker(file)} · ${file.vessel}</p><h1>${file.title}</h1></div>
+    <div class="file-heading"><div><p class="eyeline">${marker(file)} <i>·</i> ${file.vessel}</p><h1>${file.title}</h1></div>
+      <button class="pocket-photo" data-action="photograph" data-value="${file.id}" aria-label="Inspect case photograph"><img src="./media/${file.image}.webp" alt=""><span>Survey plate</span></button>
       <div class="folder-tag"><span>${file.claimant}</span><b>${file.berth}</b></div></div>
     <nav class="file-tabs" aria-label="File sections">${nav}</nav>
     ${body}</section>`;
 }
 function jacket(f,d){
-  return `<aside class="jacket"><p class="eyeline">From the case jacket</p>${imagePlate(f)}
+  return `<aside class="jacket case-jacket">${imagePlate(f)}
     <h3>The merchant’s letter</h3><p>${f.note}</p><dl>${pair("Filed by",f.claimant)}${pair("Claim presented",money(claimed(f)))}${pair("Sailed from",f.origin)}</dl>
     <p class="jacket-question">${f.question}</p></aside>`;
 }
 function lightTable(f,d,locked){
   const offset=locked?0:d.offset, aligned=offset===0;
   return `<div class="workspread"><section class="workarea">
-    <div class="work-title"><p class="eyeline">Comparison of original records</p><h2>The light table</h2>
-    <p>Line up the red and blue crosses. Compare the cargo marks, then clip the rows you need.</p></div>
-    <div class="table-frame">
+    <div class="work-title"><h2>The light table</h2>
+    <p>${locked?"The pencilled marks show which comparisons you filed with the ruling.":"Drag the blue tally until the crosses meet. Select a cargo mark on the manifest to clip its row."}</p></div>
+    <div class="table-frame" data-adjustable="${!locked}" data-aligned="${aligned}">
       <div class="instrument-head"><span>Departure manifest</span><span>Quay tally</span></div>
       <div class="register-chart" id="register-chart" style="--shift:${offset*14}px">
         <div class="sheet-back"><div class="chart-label"><span>Cargo mark</span><span>Loaded</span></div>
-          ${f.lots.map(l=>`<div class="record-row"><b>${l.mark}</b><span>${l.loaded}</span></div>`).join("")}
+          ${f.lots.map(l=>{
+            const on=d.marks.includes(l.mark);
+            return locked?`<div class="record-row sealed-mark" data-clipped="${on}"><b>${l.mark}</b><span>${l.loaded}</span></div>`:
+              `<button class="record-row mark-row" data-action="printed-mark" data-value="${l.mark}" aria-pressed="${on}" aria-label="${on?"Unclip":"Clip"} ${l.mark} from manifest" ${aligned?"":"disabled"}><b>${l.mark}</b><span>${l.loaded}</span></button>`;
+          }).join("")}
         </div>
         <div class="cross back-cross" aria-hidden="true">⊕</div>
         <div class="sheet-front"><div class="chart-label"><span>Mark</span><span>Landed</span><span>Held</span></div>
@@ -82,9 +87,9 @@ function clipInventory(f,d){
 function evidence(f,d,id,locked,setting){
   const docs=documents(f),current=docs.find(a=>a.id===id)||docs[0];
   return `<div class="workspread"><section class="workarea">
-    <div class="work-title"><p class="eyeline">Enclosures to the claim</p><h2>The evidence tray</h2><p>Examine the physical exhibit or read the papers. Clip up to four findings, including the policy wording.</p></div>
+    <div class="work-title"><h2>The evidence tray</h2><p>Examine the physical exhibit or read the papers. Clip up to four findings, including the policy wording.</p></div>
     <nav class="document-tabs" aria-label="Evidence papers">${docs.map(doc=>`<a ${doc.id===current.id?'aria-current="page"':""} href="${path(f,"evidence")}/${doc.id}">${doc.title}</a>`).join("")}</nav>
-    <article class="document-leaf"><div class="doc-livery"><span>${current.title}</span><span>${marker(f)}</span></div><h3>${current.heading}</h3><p class="signed">${current.by}</p>
+    <article class="document-leaf" data-paper="${current.id}"><div class="doc-livery"><span>${current.title}</span><span>${marker(f)}</span></div><h3>${current.heading}</h3><p class="signed">${current.by}</p>
     ${current.id==="account"?valueTable(f):""}
     ${current.id==="exhibit"?apparatus(f,d,setting,locked):`<div class="passages">${current.lines.map((line,i)=>{
       const pinned=d.facts.includes(line.id);
@@ -109,7 +114,7 @@ export function valuation(f,d){return totals(f,settlement(f,d.counts));}
 function ruling(f,d) {
   const cal=settlement(f,d.counts);
   return `<div class="workspread"><section class="workarea">
-    <div class="work-title"><p class="eyeline">Adjustment of claim</p><h2>Your ruling</h2><p>Enter how many units you allow on each cargo mark. Leave a mark at zero to decline that part of the claim.</p></div>
+    <div class="work-title"><h2>Your ruling</h2><p>Enter how many units you allow on each cargo mark. Leave a mark at zero to decline that part of the claim.</p></div>
     <div class="ruling-sheet"><div class="doc-livery"><span>Allowance sheet</span><span>${marker(f)}</span></div>
     ${f.lots.map(l=>{
       const unit=unitLoss(l),cap=disputed(l);

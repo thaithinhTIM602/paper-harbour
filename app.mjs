@@ -1,13 +1,16 @@
 import { CASEBOOK } from "./cases.mjs";
 import { resolveFile, newOffice, readOffice, normalDraft, allowedToFile, fileRuling, wireCode, parseCode, documents, money, settlement, ledger, TREATIES, disputed, readReturn } from "./office.mjs";
-import { cover, caseIndex, guide, filed, path, marker } from "./press.mjs";
+import { cover, caseIndex, guide, filed, path, marker, chartDocket, photograph } from "./press.mjs";
 import { caseRoom, comparisons, valuation } from "./desk.mjs";
 import { ledgerRoom, wireRoom, gazette } from "./rooms.mjs";
 
+import { installMagnifier } from "./magnifier.mjs";
+import { BERTHS } from "./chart.mjs";
 import { returnRoom } from "./post.mjs";
 
 const KEY="paper-harbour.office.v1",SOUND="paper-harbour.sounds";
 const main=document.querySelector("#main-desk"),dialog=document.querySelector("#office-dialog");
+installMagnifier(dialog);
 let state=newOffice(), durable=true, sound=false, queue=Promise.resolve(), audio=null, messageTimer, pendingImport=null;
 try{state=readOffice(localStorage.getItem(KEY));sound=localStorage.getItem(SOUND)==="on";}catch{durable=false;}
 let view={},lastAddress="",trial=false, instrument={index:0,used:false};
@@ -39,6 +42,7 @@ function notice(text){
 function here(){
   const raw=location.hash.slice(1)||"cover";
   const [room,id,step,doc]=raw.split("/");
+  if(room==="cover")return {room,berth:Object.hasOwn(BERTHS,id)?id:null};
   if(room==="file"){
     const file=resolveFile(id);
     if(!file)return {room:"missing"};
@@ -67,7 +71,7 @@ function render(moving=true){
   lastAddress=location.hash;view=v;
   let html,title;
   switch(v.room){
-    case "cover":html=cover(state);title="The summer casebook";break;
+    case "cover":html=cover(state,v.berth);title="The summer casebook";break;
     case "register":html=caseIndex(state);title="Case register";break;
     case "guide":html=guide();title="How the desk works";break;
     case "ledger":html=ledgerRoom(state)+`<div class="wrap">${deskCopies()}</div>`;title="Office ledger";break;
@@ -77,7 +81,7 @@ function render(moving=true){
     case "file":html=caseRoom(state,v.file,v.step,v.doc,trial,instrument);title=v.file.title;break;
     default:html='<section class="wrap room"><h1>That file is missing.</h1><p>Return to the register to pull a summer claim.</p><a class="primary" href="#register">Open the register →</a></section>';title="File not found";
   }
-  main.innerHTML=html;
+  main.dataset.room=v.room;main.innerHTML=html;
   document.title=`${title} · Paper Harbour`;
   for(const link of document.querySelectorAll(".mast nav a")){
     const selected=link.hash===`#${v.room}`||(v.room==="file"&&link.hash===(v.file.wire?"#wire":"#register"))||(v.room==="gazette"&&link.hash==="#ledger");
@@ -121,15 +125,40 @@ function registration(offset){
   if(!f||!slider)return;
   const d=normalDraft(f,state.drafts[f.id]);d.offset=offset;slider.value=String(offset);
   slider.setAttribute("aria-valuetext",offset===0?"Aligned":`${Math.abs(offset)} marks away`);
+  const frame=document.querySelector(".table-frame");frame.dataset.aligned=String(offset===0);
+  for(const row of frame.querySelectorAll(".mark-row"))row.disabled=offset!==0;
   document.querySelector("#register-chart").style.setProperty("--shift",`${offset*14}px`);
   document.querySelector("#register-status").textContent=offset===0?"Crosses aligned":"Crosses apart";
   document.querySelector("#compare-notes").innerHTML=comparisons(f,d,offset===0,false);
 }
+function selectBerth(id){
+  if(view.room!=="cover"||!Object.hasOwn(BERTHS,id))return;
+  const file=resolveFile(id),route=document.querySelector("#pilot-course");
+  for(const pin of main.querySelectorAll(".berth-point"))pin.setAttribute("aria-pressed",String(pin.dataset.value===id));
+  route.setAttribute("d",BERTHS[id].course);
+  document.querySelector("#chart-docket").innerHTML=chartDocket(state,file);
+  history.replaceState(null,"",`#cover/${id}`);view=here();lastAddress=location.hash;
+  aclick("click");
+}
+document.addEventListener("keydown",e=>{
+  const current=e.target.closest(".berth-point");
+  if(!current)return;
+  const points=[...main.querySelectorAll(".berth-point")],i=points.indexOf(current);
+  const next={ArrowRight:(i+1)%points.length,ArrowDown:(i+1)%points.length,ArrowLeft:(i+points.length-1)%points.length,ArrowUp:(i+points.length-1)%points.length,Home:0,End:points.length-1}[e.key];
+  if(next===undefined)return;
+  e.preventDefault();points[next].focus({preventScroll:true});selectBerth(points[next].dataset.value);
+});
+dialog.addEventListener("close",()=>{
+  if(dialog.open)return;
+  dialog.classList.remove("photo-dialog");
+  delete dialog.dataset.photo;
+});
 let grip=null;
 document.addEventListener("pointerdown",e=>{
-  const el=e.target.closest(".sheet-grip");if(!el)return;
+  const el=e.target.closest(".sheet-grip, .table-frame[data-adjustable=true] .sheet-front");if(!el||e.button!==0||!e.isPrimary)return;
   const slider=document.querySelector("#register-offset");
-  grip={id:e.pointerId,y:e.clientY,start:Number(slider.value),moved:false};
+  grip={id:e.pointerId,el,y:e.clientY,start:Number(slider.value),moved:false};
+  el.classList.add("moving-sheet");
   el.setPointerCapture(e.pointerId);
 });
 document.addEventListener("pointermove",e=>{
@@ -140,8 +169,9 @@ document.addEventListener("pointermove",e=>{
 });
 function endGrip(e){
   if(!grip||grip.id!==e.pointerId)return;
-  const el=e.target.closest(".sheet-grip");
-  if(grip.moved&&el){
+  const el=grip.el;el.classList.remove("moving-sheet");
+  if(e.type==="pointercancel"){registration(grip.start);grip=null;return;}
+  if(grip.moved){
     el.dataset.dragged="1";const n=Number(document.querySelector("#register-offset").value);
     editDraft(view.file,d=>d.offset=n,false);
     setTimeout(()=>{delete el.dataset.dragged;},350);
@@ -193,9 +223,22 @@ document.addEventListener("click",async e=>{
   await queue;
   const f=view.file,d=f?normalDraft(f,state.drafts[f.id]):null;
   switch(action){
+    case "berth":selectBerth(value);break;
+    case "photograph":{
+      const file=value==="archive"?null:resolveFile(value);
+      if(value!=="archive"&&!file)break;
+      dialog.dataset.photo=value;dialog.classList.add("photo-dialog");
+      dialog.innerHTML=photograph(file);dialog.showModal();dialog.querySelector('[data-action="close-dialog"]').focus();
+      break;}
+    case "flip-print":{
+      const id=dialog.dataset.photo;
+      if(!dialog.open||!id)break;
+      const back=btn.getAttribute("aria-pressed")!=="true";
+      dialog.innerHTML=photograph(id==="archive"?null:resolveFile(id),back);
+      dialog.querySelector(".flip-print").focus({preventScroll:true});aclick("click");break;}
     case "square":case "grip":
       if(f){registration(0);await editDraft(f,x=>x.offset=0,false);aclick("click");notice("The manifest and tally are aligned.");}break;
-    case "mark":
+    case "mark":case "printed-mark":
       if(f&&d.offset===0){await editDraft(f,x=>toggle(x.marks,value));aclick("click");}break;
     case "fact":
       if(f){await editDraft(f,x=>{
