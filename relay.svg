@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" fill="none">
+  <title>Paper Harbour orbital freight emblem</title>
+  <rect x="2" y="2" width="56" height="56" rx="13" fill="#ff885f" stroke="#140f22" stroke-width="3"/>
+  <path d="m17 24 14-7 13 6-14 8z" fill="#fff2c9" stroke="#221c31" stroke-width="2" stroke-linejoin="round"/>
+  <path d="m17 24 13 7v15l-13-7zm13 7 14-8v15l-14 8z" fill="#292338" stroke="#211c2e" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M8 40c-2-5 5-13 13-19M49 22c7 7-12 22-26 25-5 1-9 1-11-1" stroke="#fff1ca" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="m46 10 .9 3.2 3.1 1-3.1 1-.9 3.1-1-3.1-3.1-1 3.1-1z" fill="#272033"/>
+</svg>

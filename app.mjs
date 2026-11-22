@@ -1,11 +1,12 @@
 import { CASEBOOK } from "./cases.mjs";
 import { resolveFile, newOffice, readOffice, normalDraft, allowedToFile, fileRuling, wireCode, parseCode, documents, money, settlement, ledger, TREATIES, disputed, readReturn } from "./office.mjs";
-import { cover, caseIndex, guide, filed, path, marker, chartDocket, photograph } from "./press.mjs";
+import { cover, caseIndex, guide, filed, path, marker, chartDocket, photograph, selectedFile, folio } from "./press.mjs";
 import { caseRoom, comparisons, valuation } from "./desk.mjs";
 import { ledgerRoom, wireRoom, gazette } from "./rooms.mjs";
 
 import { installMagnifier } from "./magnifier.mjs";
-import { BERTHS } from "./chart.mjs";
+import { BERTHS, dispatchAcross } from "./chart.mjs";
+import { crewPanel } from "./spool.mjs";
 import { returnRoom } from "./post.mjs";
 
 const KEY="paper-harbour.office.v1",SOUND="paper-harbour.sounds";
@@ -71,23 +72,23 @@ function render(moving=true){
   lastAddress=location.hash;view=v;
   let html,title;
   switch(v.room){
-    case "cover":html=cover(state,v.berth);title="The summer casebook";break;
+    case "cover":html=cover(state,v.berth);title="Night Shift";break;
     case "register":html=caseIndex(state);title="Case register";break;
-    case "guide":html=guide();title="How the desk works";break;
+    case "guide":html=guide();title="Field guide";break;
     case "ledger":html=ledgerRoom(state)+`<div class="wrap">${deskCopies()}</div>`;title="Office ledger";break;
     case "gazette":html=gazette(state);title=ledger(state).complete?"The Shipping Gazette":"Office ledger";break;
-    case "wire":html=wireRoom(state,v.packet?.wire?v.packet:null,v.bad?"That address does not contain a valid wire code. Check the printed code.":"");title="Wire room";break;
+    case "wire":html=wireRoom(state,v.packet?.wire?v.packet:null,v.bad?"That address does not contain a valid wire code. Check the printed code.":"");title="Station comms";break;
     case "return":html=returnRoom(state,v.code,v.token);title="Return cable";break;
     case "file":html=caseRoom(state,v.file,v.step,v.doc,trial,instrument);title=v.file.title;break;
     default:html='<section class="wrap room"><h1>That file is missing.</h1><p>Return to the register to pull a summer claim.</p><a class="primary" href="#register">Open the register →</a></section>';title="File not found";
   }
   main.dataset.room=v.room;main.innerHTML=html;
   document.title=`${title} · Paper Harbour`;
-  for(const link of document.querySelectorAll(".mast nav a")){
+  for(const link of document.querySelectorAll(".mast nav a, .manual-link")){
     const selected=link.hash===`#${v.room}`||(v.room==="file"&&link.hash===(v.file.wire?"#wire":"#register"))||(v.room==="gazette"&&link.hash==="#ledger");
     if(selected)link.setAttribute("aria-current","page");else link.removeAttribute("aria-current");
   }
-  const soundButton=document.querySelector("#sound-toggle");soundButton.setAttribute("aria-pressed",String(sound));soundButton.textContent=`Desk sounds ${sound?"on":"off"}`;
+  const soundButton=document.querySelector("#sound-toggle");soundButton.setAttribute("aria-pressed",String(sound));soundButton.textContent=`Station audio ${sound?"on":"off"}`;
   const share=document.querySelector("#wire-url");if(share)share.value=wireURL(v.packet.id);
   const returnAddress=document.querySelector("#return-address");
   if(returnAddress){const u=new URL(location.href);u.hash=`return/${v.file.id}/${returnAddress.dataset.returnToken}`;returnAddress.value=u.href;}
@@ -103,7 +104,7 @@ function aclick(kind){
     audio||=new (window.AudioContext||window.webkitAudioContext)();
     if(audio.state==="suspended")audio.resume().catch(()=>{});
     const t=audio.currentTime,osc=audio.createOscillator(),vol=audio.createGain();
-    const low=kind==="stamp";osc.type=low?"triangle":"sine";osc.frequency.setValueAtTime(low?150:760,t);osc.frequency.exponentialRampToValueAtTime(low?48:410,t+0.065);
+    const low=kind==="stamp";osc.type=low?"triangle":"sine";osc.frequency.setValueAtTime(low?150:kind==="radio"?392:660,t);osc.frequency.exponentialRampToValueAtTime(low?48:kind==="radio"?587:460,t+0.065);
     vol.gain.setValueAtTime(low?0.09:0.035,t);vol.gain.exponentialRampToValueAtTime(0.0001,t+0.085);osc.connect(vol);vol.connect(audio.destination);osc.start(t);osc.stop(t+0.09);
   }catch{}
 }
@@ -133,9 +134,11 @@ function registration(offset){
 }
 function selectBerth(id){
   if(view.room!=="cover"||!Object.hasOwn(BERTHS,id))return;
-  const file=resolveFile(id),route=document.querySelector("#pilot-course");
+  const file=resolveFile(id);
+  const previous=main.querySelector(".berth-point[aria-pressed=true]")?.dataset.value;
   for(const pin of main.querySelectorAll(".berth-point"))pin.setAttribute("aria-pressed",String(pin.dataset.value===id));
-  route.setAttribute("d",BERTHS[id].course);
+  dispatchAcross(main.querySelector(".station-plan"),previous,id);
+  document.querySelector("#bay-readout").textContent=`Bay ${folio(file.number)} / 06`;
   document.querySelector("#chart-docket").innerHTML=chartDocket(state,file);
   history.replaceState(null,"",`#cover/${id}`);view=here();lastAddress=location.hash;
   aclick("click");
@@ -148,10 +151,23 @@ document.addEventListener("keydown",e=>{
   if(next===undefined)return;
   e.preventDefault();points[next].focus({preventScroll:true});selectBerth(points[next].dataset.value);
 });
+function showCrew(file,step,detail=false){
+  if(!file)return;
+  const closed=filed(state,file.id);
+  dialog.classList.add("crew-dialog");dialog.dataset.crewFile=file.id;dialog.dataset.crewStep=step;
+  dialog.innerHTML=crewPanel(file,step,closed?.draft||state.drafts[file.id],Boolean(closed),detail);
+  aclick("radio");
+  if(!dialog.open){
+    dialog.showModal();
+    dialog.querySelector('[data-action="close-dialog"]').focus();
+  }else{
+    dialog.querySelector('[data-action="spool-more"]').focus({preventScroll:true});
+  }
+}
 dialog.addEventListener("close",()=>{
   if(dialog.open)return;
-  dialog.classList.remove("photo-dialog");
-  delete dialog.dataset.photo;
+  dialog.classList.remove("photo-dialog","crew-dialog");
+  delete dialog.dataset.photo;delete dialog.dataset.crewFile;delete dialog.dataset.crewStep;
 });
 let grip=null;
 document.addEventListener("pointerdown",e=>{
@@ -220,10 +236,22 @@ document.addEventListener("click",async e=>{
   const btn=e.target.closest("[data-action]");if(!btn)return;
   const action=btn.dataset.action,value=btn.dataset.value;
   if(action==="grip"&&btn.dataset.dragged)return;
+  if(action==="leave-crew"){if(dialog.open)dialog.close();return;}
   await queue;
   const f=view.file,d=f?normalDraft(f,state.drafts[f.id]):null;
   switch(action){
-    case "berth":selectBerth(value);break;
+    case "floor":case "berth":selectBerth(value);break;
+    case "cycle-bay":{
+      const pins=[...main.querySelectorAll(".berth-point")];
+      if(!pins.length)break;
+      const current=pins.findIndex(p=>p.getAttribute("aria-pressed")==="true");
+      selectBerth(pins[(current+(value==="previous"?-1:1)+pins.length)%pins.length].dataset.value);break;}
+    case "ask-spool":{
+      const file=f||(view.room==="cover"?selectedFile(state,view.berth):null);
+      showCrew(file,view.step||"deck");break;}
+    case "spool-more":{
+      if(dialog.open&&dialog.dataset.crewFile)showCrew(resolveFile(dialog.dataset.crewFile),dialog.dataset.crewStep,value==="detail");
+      break;}
     case "photograph":{
       const file=value==="archive"?null:resolveFile(value);
       if(value!=="archive"&&!file)break;

@@ -1,7 +1,7 @@
 import { CASEBOOK } from "./cases.mjs";
 import { ledger, resolveFile } from "./office.mjs";
 
-import { chartDrawing } from "./chart.mjs";
+import { BERTHS, chartDrawing } from "./chart.mjs";
 
 export const folio=n=>String(n).padStart(2,"0");
 export const marker=file=>file.wire?`Wire ${file.id}`:`File ${folio(file.number)}`;
@@ -17,7 +17,7 @@ export function indexRows(s) {
     const f=resolveFile(base.id),closed=filed(s,f.id),begun=Boolean(s.drafts[f.id]);
     return `<a class="index-row" href="${path(f,closed?"receipt":"table")}"><span class="index-no">${folio(i+1)}</span>
       <span class="index-contact"><img src="./media/${f.image}.webp" alt="" width="110" height="74" loading="lazy"></span>
-      <span class="index-name"><b>${f.title}</b><small>${f.cargo} · ${f.vessel}</small></span>
+      <span class="index-name"><b>${f.title}</b><small>${BERTHS[base.id].name} · ${f.cargo}</small></span>
       <span class="index-date">${f.date} 1962</span><span class="index-state ${closed?"filed":""}">${closed?"Filed":begun?"On the desk":"Open file"}</span>${next}</a>`;
   }).join("");
 }
@@ -32,36 +32,43 @@ export function chartDocket(s,f){
   if(closed)verb="Read filed ruling";
   else if(draft)verb="Resume your file";
   else if(f.id===automatic.id)verb=ledger(s).rows.length?"Open the next file":"Open the first file";
-  return `<div class="docket-mark"><span>File</span><b>${folio(f.number)}</b></div>
-    <div class="docket-image"><img src="./media/${f.image}.webp" width="508" height="508" alt=""></div>
-    <div class="docket-title"><small>${f.vessel} <i>·</i> ${f.date} 1962</small><h2>${f.title}</h2><p>${f.lead}</p></div>
-    <a class="docket-open" href="${path(f,closed?"receipt":"table")}">${verb} ${next}</a>`;
+  const room=BERTHS[f.baseId||f.id];
+  return `<div class="ticket-code" aria-hidden="true"><span>File</span><b>${folio(f.number)}</b></div>
+    <div class="ticket-photo"><img src="./media/${f.image}.webp" width="508" height="508" alt=""></div>
+    <div class="ticket-brief"><small><i style="background:${room.color}"></i>${room.name} <span>/</span> ${f.vessel}</small>
+      <h2>${f.title}</h2><p>${f.lead}</p></div>
+    <a class="ticket-action" href="${path(f,closed?"receipt":"table")}">${verb}</a>`;
 }
+
 export function cover(s,id){
-  const f=selectedFile(s,id),book=ledger(s);
-  return `<div class="atlas-home wrap"><section class="harbour-book" aria-label="The summer casebook">
-    <div class="atlas-sheet"><div class="atlas-edge" aria-hidden="true"></div>
-      <div class="atlas-cartouche">
-        <p class="volume-line">A marine claims casebook</p>
-        <h1>Paper <em>Harbour</em></h1>
-        <p class="cartouche-copy">Six ships arrived with cargo damaged or missing. Open a file and decide what the merchant is owed.</p>
-        <button class="archive-print" type="button" data-action="photograph" data-value="archive" aria-label="Inspect the Liverpool dock photograph"><img src="./media/vigilant-quay.webp" width="1465" height="1215" alt="The crew of the Vigilant alongside the Liverpool dock crane"><span>Liverpool · published 1910 <i class="lens-mark" aria-hidden="true"></i></span></button>
+  const f=selectedFile(s,id),book=ledger(s),closedIds=book.rows.map(row=>row.id);
+  return `<div class="flight-deck wrap">
+    <section class="shift-stage" aria-label="Night shift aboard Relay Nine">
+      <div class="shift-intro">
+        <div class="station-id"><i aria-hidden="true"></i> Relay Nine <span>/</span> Cargo station</div>
+        <h1><span>Night</span> <strong>Shift<span class="title-period">.</span></strong></h1>
+        <p class="shift-copy">Six cargo mysteries from Earth sit in the station archive. Choose a bay, examine the evidence and decide what the merchant is owed.</p>
+        <button class="spool-contact" type="button" data-action="ask-spool"><img src="./media/spool.webp" width="720" height="480" alt=""><span><small>Deck mechanic</small><b>Ask Spool</b></span><i class="comms-icon" aria-hidden="true"></i></button>
       </div>
-      <div class="atlas-field"><div class="map-top"><h2>Port of Ledgerwick</h2><span>Harbour plan · 1962</span></div>
-        ${chartDrawing(f.id,book.rows.map(row=>row.id))}
-        <div class="map-key"><span><i></i> Selected course${book.rows.length?'<em class="filed-key">✓ Filed</em>':""}</span><span>Choose a numbered berth</span></div>
-      </div></div>
-    <div class="docket" id="chart-docket" aria-live="polite" aria-atomic="true">${chartDocket(s,f)}</div>
-  </section>
-  <div class="atlas-foot"><span>${book.rows.length} of six claims filed</span>
-    <a href="#register">Written case register ${next}</a>
-    <a href="${book.complete?"#ledger":"#guide"}">${book.complete?"Read the closing book":"How to work the desk"} ${next}</a></div></div>`;
+      <div class="deck-board"><div class="board-rail"><h2><i aria-hidden="true"></i>Station map</h2><span>Choose a bay</span></div>
+        ${chartDrawing(f.id,closedIds)}
+        <div class="board-controls"><div class="map-legend"><i aria-hidden="true"></i>Spool’s route${closedIds.length?'<span class="filed-key">✓ Filed</span>':""}</div>
+          <div class="bay-switch"><button type="button" data-action="cycle-bay" data-value="previous" aria-label="Previous station bay"><i aria-hidden="true"></i></button>
+            <output id="bay-readout" aria-label="Selected bay">Bay ${folio(f.number)} / 06</output><button type="button" data-action="cycle-bay" data-value="next" aria-label="Next station bay"><i aria-hidden="true"></i></button></div></div>
+      </div>
+    </section>
+    <section class="assignment-ticket" id="chart-docket" aria-label="Selected case" aria-live="polite" aria-atomic="true">${chartDocket(s,f)}</section>
+    <div class="shift-log"><div><span class="shift-meter" aria-hidden="true">${CASEBOOK.map(c=>`<i class="${closedIds.includes(c.id)?"logged":""}"></i>`).join("")}</span><span>${book.rows.length} of six claims filed</span></div>
+      <a href="${book.complete?"#ledger":"#register"}">${book.complete?"Read the closing book":"Browse case files"}</a>
+      <button type="button" data-action="photograph" data-value="archive">Liverpool archive print</button></div>
+    </div>`;
 }
-export function caseIndex(s) {
-  return `<section class="room wrap register-room"><div class="register-mast"><div><p class="eyeline">Ledgerwick · Summer 1962</p><h1>The case register</h1></div><span class="type-note">${ledger(s).rows.length} of 6 filed</span></div>
-    <p class="register-intro">Select a cargo file to examine its paperwork and survey plate.</p>
+
+export function caseIndex(s){
+  return `<section class="room wrap register-room"><div class="register-mast"><div><p class="eyeline">Relay Nine / Earth archive / Summer 1962</p><h1>The case register</h1></div><span class="type-note">${ledger(s).rows.length} of 6 filed</span></div>
+    <p class="register-intro">Six shipments, six workbenches. Open a file to compare the paperwork and examine its cargo.</p>
     <div class="index-list">${indexRows(s)}</div>
-    <div class="inline-route"><a href="#cover">Return to the harbour chart ${next}</a></div></section>`;
+    <div class="inline-route"><a href="#cover">Return to the station map</a></div></section>`;
 }
 export function photograph(file,back=false){
   const archive=!file;
@@ -79,8 +86,8 @@ export function photograph(file,back=false){
 
 
 export function guide() {
-  return `<section class="room wrap narrow-room">${sectionTitle("Desk copy · Instructions to the adjuster","How the desk works")}
-    <p class="room-intro">You work for Tide Mutual, a group of merchants who pool money to insure their cargo. Your job is to find the loss their written agreement actually covers.</p>
+  return `<section class="room wrap narrow-room">${sectionTitle("Relay Nine / Field guide","Working the night shift")}
+    <p class="room-intro">Relay Nine is an orbital archive. Its six bays reconstruct cases from Tide Mutual, a fictional marine insurance office in 1962. Each merchant wants payment for a shipment. You decide how much the written agreement covers. Ask Spool at any workbench for a lead.</p>
     <div class="manual">
       <article><span>I</span><div><h2>Square the sheets</h2><p>The manifest says what sailed. The quay tally says what landed and how many landed units were held for inspection. “Held” is part of “landed.” Drag the blue tally until its cross meets the red one, or press <b>Square the sheets</b>. Select a mark on the manifest to clip it. The comparison slip lists the same marks.</p></div></article>
       <article><span>II</span><div><h2>Build an evidence clip</h2><p>Work the physical exhibit, then read the survey, ship’s papers, policy and valuation. Clip up to four readings or passages. Aim to document both material findings and the coverage wording. A wet or missing parcel can have more than one explanation.</p></div></article>

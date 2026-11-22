@@ -1,30 +1,33 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { CASEBOOK } from "../cases.mjs";
-import { BERTHS, chartDrawing } from "../chart.mjs";
+import { BERTHS, chartDrawing, travelBetween } from "../chart.mjs";
 import { cover, selectedFile, chartDocket, photograph } from "../press.mjs";
 import { caseRoom } from "../desk.mjs";
 import { newOffice, resolveFile, fileRuling, readOffice, wireCode } from "../office.mjs";
+import { crewAdvice, crewPanel } from "../spool.mjs";
 import { lensPosition } from "../magnifier.mjs";
 
 const record = f => ({ offset:0, marks:[f.lots[0].mark], facts:["policy.cover"] });
 
-test("every harbour course ends at the berth that opens its case",()=>{
+test("every plotted service route ends at the bay that opens its case",()=>{
   assert.deepEqual(Object.keys(BERTHS).sort(),CASEBOOK.map(f=>f.id).sort());
   for(const file of CASEBOOK){
-    const {x,y,course}=BERTHS[file.id];
-    assert.ok(x>0&&x<760&&y>0&&y<450);
+    const {x,y,course,name}=BERTHS[file.id];
+    assert.ok(x>0&&x<720&&y>0&&y<480);
     assert.ok(course.endsWith(`${x} ${y}`));
     const chart=chartDrawing(file.id);
     assert.equal((chart.match(/data-action="berth"/g)||[]).length,6);
     assert.equal((chart.match(/aria-pressed="true"/g)||[]).length,1);
-    assert.ok(chart.includes(`aria-label="Select ${file.berth}, ${file.title}" aria-pressed="true"`));
+    assert.ok(chart.includes(`aria-label="Select ${name}, ${file.title}" aria-pressed="true"`));
+    assert.ok(chart.includes(`data-action="floor" data-value="${file.id}"`));
+    assert.ok(chart.includes(`class="dispatch-token" transform="translate(${x} ${y})"`));
     assert.ok(chart.includes(`class="pilot-course" d="${course}"`));
     assert.ok(chartDocket(newOffice(),resolveFile(file.id)).includes(`#file/${file.id}/table`));
   }
 });
 
-test("the chart restores an unfinished summer claim and respects an explicitly selected berth",()=>{
+test("the deck restores an unfinished Earth claim and respects a directly selected bay",()=>{
   const s=newOffice();
   assert.equal(selectedFile(s).id,"coffee");
   const draft=resolveFile("china");
@@ -36,7 +39,7 @@ test("the chart restores an unfinished summer claim and respects an explicitly s
   assert.match(cover(reopened,"tea"),/href="#file\/tea\/table"/);
 });
 
-test("filed berths reopen their receipts and wire rulings never mark the summer chart",()=>{
+test("filed bays reopen their receipts and wire rulings never mark the station map",()=>{
   const s=newOffice(),wire=resolveFile(wireCode("coffee",125));
   assert.ok(fileRuling(s,wire,record(wire)));
   assert.doesNotMatch(cover(s),/data-filed="true"|class="filed-key"/);
@@ -44,7 +47,7 @@ test("filed berths reopen their receipts and wire rulings never mark the summer 
   assert.ok(fileRuling(s,coffee,record(coffee)));
   const html=cover(readOffice(JSON.stringify(s)),"coffee");
   assert.equal((html.match(/data-filed="true"/g)||[]).length,1);
-  assert.ok(html.includes(`aria-label="Select ${coffee.berth}, ${coffee.title}, filed"`));
+  assert.ok(html.includes(`aria-label="Select ${BERTHS.coffee.name}, ${coffee.title}, filed"`));
   assert.ok(html.includes('href="#file/coffee/receipt">Read filed ruling'));
   for(const f of CASEBOOK.slice(1)){
     const file=resolveFile(f.id);
@@ -94,3 +97,30 @@ test("moving the glass samples the actual print at the centre and along its edge
   assert.deepEqual([resized.left,resized.top,resized.offsetX,resized.offsetY],[50,75,-130,-205]);
 });
 
+test("the dispatch unit follows connected corridors between every pair of bays",()=>{
+  for(const [before,a] of Object.entries(BERTHS)){
+    for(const [after,b] of Object.entries(BERTHS)){
+      const track=travelBetween(before,after);
+      assert.ok(track.startsWith("M"+a.x+" "+a.y));
+      assert.ok(track.endsWith(b.x+" "+b.y));
+      if(before===after)assert.equal(track,"M"+a.x+" "+a.y);
+      const segments=[...track.matchAll(/[ML](\d+) (\d+)/g)].map(m=>[+m[1],+m[2]]);
+      assert.ok(segments.length>0);
+      assert.equal(new Set(segments.map(x=>x.join(","))).size,segments.length);
+    }
+  }
+  assert.equal(travelBetween("", "dynamo"),BERTHS.dynamo.course);
+  assert.equal(travelBetween("radio","missing"),"");
+});
+
+test("Spool gives distinct clues in each bay and opens the right archived or wire shipment",()=>{
+  const summer=CASEBOOK.map(c=>resolveFile(c.id));
+  assert.equal(new Set(summer.map(f=>crewAdvice(f,"deck",null,false).first)).size,6);
+  for(const f of [...summer,resolveFile(wireCode("radio",220))]){
+    const advice=crewAdvice(f,"evidence",null,false);
+    assert.equal(advice.target,"#file/"+f.id+"/evidence/exhibit");
+    assert.match(crewPanel(f,"table",null,false),/blue tally/);
+    assert.ok(crewPanel(f,"evidence",null,false,true).includes(advice.second));
+    assert.equal(crewAdvice(f,"receipt",record(f),true).target,"#file/"+f.id+"/receipt");
+  }
+});
