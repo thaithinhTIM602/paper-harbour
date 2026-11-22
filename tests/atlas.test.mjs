@@ -97,8 +97,6 @@ test("moving the glass samples the actual print at the centre and along its edge
   assert.deepEqual([resized.left,resized.top,resized.offsetX,resized.offsetY],[50,75,-130,-205]);
 });
 
-
-
 test("the dispatch unit follows connected corridors between every pair of bays",()=>{
   for(const [before,a] of Object.entries(BERTHS)){
     for(const [after,b] of Object.entries(BERTHS)){
@@ -106,7 +104,8 @@ test("the dispatch unit follows connected corridors between every pair of bays",
       assert.ok(track.startsWith("M"+a.x+" "+a.y));
       assert.ok(track.endsWith(b.x+" "+b.y));
       if(before===after)assert.equal(track,"M"+a.x+" "+a.y);
-      const segments=[...track.matchAll(/[ML](\\d+) (\\d+)/g)].map(m=>[+m[1],+m[2]]);
+      const segments=[...track.matchAll(/[ML](\d+) (\d+)/g)].map(m=>[+m[1],+m[2]]);
+      assert.ok(segments.length>0);
       assert.equal(new Set(segments.map(x=>x.join(","))).size,segments.length);
     }
   }
