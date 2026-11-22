@@ -4,7 +4,7 @@ import { sectionTitle, pair, path, next, filed, folio } from "./press.mjs";
 
 export function ledgerRoom(s){
   const book=ledger(s),frozen=book.rows.length>0;
-  return `<section class="room wrap">${sectionTitle("Tide Mutual · Cash office","The office ledger",`<span class="type-note">${book.rows.length} of 6 rulings entered</span>`)}
+  return `<section class="room wrap">${sectionTitle("Relay Nine / Accounts","The office ledger",`<span class="type-note">${book.rows.length} of 6 rulings entered</span>`)}
     <p class="room-intro">The cash book follows the six summer files. Payments leave the drawer when you stamp. Appeals and recoveries arrive with the next post.</p>
     <div class="ledger-spread"><section class="ledger-body">
       <div class="cash-leaf"><div class="doc-livery"><span>Cash reconciliation</span><span>Summer 1962</span></div>
@@ -25,7 +25,7 @@ export function ledgerRoom(s){
 export function wireRoom(s,packet,feedback=""){
   const generated=packet?.wire?packet:null;
   const known=s.loose.map(id=>resolveFile(id)).filter(Boolean).reverse();
-  return `<section class="room wrap">${sectionTitle("Ledgerwick cable office","The wire room")}
+  return `<section class="room wrap">${sectionTitle("Relay Nine / Communications","Station comms")}
     <p class="room-intro">Send a friend the same sealed case. The cable clerk varies the cargo counts, prices and policy terms. Each player opens a separate desk. Exchange return slips after filing to compare the two rulings.</p>
     <div class="wire-spread"><section class="wire-form"><div class="doc-livery"><span>Outbound telegram</span><span>Tide Mutual</span></div>
       <h2>Make up a shipment</h2><label for="wire-type">Subject of the claim</label><select id="wire-type">${CASEBOOK.map(f=>`<option value="${f.id}" ${generated?.baseId===f.id?"selected":""}>${f.cargo}</option>`).join("")}</select>

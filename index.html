@@ -3,30 +3,32 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#183e49">
-  <meta name="description" content="Work the summer casebook at Tide Mutual, a fictional 1962 marine insurance office. Six cargo mysteries, a light table and a ledger in your hands.">
-  <meta property="og:title" content="Paper Harbour · The summer casebook">
-  <meta property="og:description" content="Six cargo mysteries at a fictional 1962 port. Inspect the records and decide who pays.">
-  <meta property="og:image" content="https://thaithinhtim602.github.io/paper-harbour/media/vigilant-quay.webp">
-  <meta property="og:image:alt" content="A dock crane lowers a gas buoy aboard the Vigilant at Liverpool. Photographic plate published in 1910.">
-  <title>Paper Harbour · The summer casebook</title>
-  <link rel="icon" href="./beacon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#171626">
+  <meta name="description" content="Take the night shift on Relay Nine. Choose a station bay, work the evidence with Spool and solve six cargo mysteries in Paper Harbour.">
+  <meta property="og:title" content="Paper Harbour · Night Shift">
+  <meta property="og:description" content="A playable orbital cargo station with six archived mysteries and one mechanical deckhand.">
+  <meta property="og:image" content="https://thaithinhtim602.github.io/paper-harbour/media/night-station.webp">
+  <meta property="og:image:alt" content="An illustrated cutaway of Relay Nine with six coloured cargo bays connected by service corridors.">
+  <title>Night Shift · Paper Harbour</title>
+  <link rel="icon" href="./relay.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./printshop.css">
   <link rel="stylesheet" href="./instruments.css">
   <link rel="stylesheet" href="./atlas.css">
-  <link rel="preload" as="font" href="./media/OldStandard-Regular.woff" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="./station.css">
+  <link rel="preload" as="font" href="./media/BarlowCondensed-ExtraBold.woff" type="font/woff" crossorigin>
 </head>
 <body>
-  <a class="skip" href="#main-desk">Skip to the desk</a>
+  <a class="skip" href="#main-desk">Skip to the station</a>
   <header class="mast"><div class="mast-inner">
-    <a class="brand" href="#cover" aria-label="Tide Mutual home"><img src="./beacon.svg" alt="" width="39" height="39"><span>Tide Mutual<small>MARINE ASSURANCE</small></span></a>
-    <nav aria-label="Office rooms"><a class="chart-link" href="#cover">Chart</a><a href="#register">Casebook</a><a href="#ledger">Ledger</a><a href="#wire">Wire room</a><a class="guide-link" href="#guide">How to play</a></nav>
+    <a class="brand" href="#cover" aria-label="Paper Harbour flight deck"><img src="./relay.svg" alt="" width="44" height="44"><span>Paper Harbour</span></a>
+    <nav aria-label="Station rooms"><a class="chart-link" href="#cover">Flight deck</a><a href="#register">Case files</a><a href="#ledger">Ledger</a><a href="#wire">Comms</a></nav>
+    <a class="manual-link" href="#guide" aria-label="Field guide"><span aria-hidden="true">?</span><b>Field guide</b></a>
   </div></header>
-  <main id="main-desk" tabindex="-1"><noscript>Paper Harbour needs JavaScript to work the light table and file a ruling.</noscript></main>
-  <footer class="imprint"><div><span>Tide Mutual</span><span>Paper Harbour · A fictional port, 1962</span></div><a href="#guide" class="footer-guide">Desk guide</a><button data-action="sound" id="sound-toggle" aria-pressed="false">Desk sounds off</button></footer>
+  <main id="main-desk" tabindex="-1"><noscript>Turn on JavaScript to explore Relay Nine, examine the evidence and save a ruling.</noscript></main>
+  <footer class="imprint"><div><span>Paper Harbour</span><span>Tide Mutual orbital archive</span></div><a href="#guide" class="footer-guide">Field guide</a><button data-action="sound" id="sound-toggle" aria-pressed="false">Station audio off</button></footer>
   <dialog id="office-dialog" aria-labelledby="dialog-title"></dialog>
   <div id="announcement" role="status" aria-live="polite" aria-atomic="true"></div>
-  <script type="importmap">{"imports":{"./press.mjs":"./press.mjs?edition=chart","./desk.mjs":"./desk.mjs?edition=chart"}}</script>
-  <script type="module" src="./app.mjs?edition=chart"></script>
-</body></html>
-
+  <script type="importmap">{"imports":{"./press.mjs":"./press.mjs?edition=relay","./desk.mjs":"./desk.mjs?edition=relay","./chart.mjs":"./chart.mjs?edition=relay","./rooms.mjs":"./rooms.mjs?edition=relay"}}</script>
+  <script type="module" src="./app.mjs?edition=relay"></script>
+</body>
+</html>

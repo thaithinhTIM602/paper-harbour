@@ -1,12 +1,12 @@
 # Paper Harbour
 
-A playable marine insurance office in the fictional port of Ledgerwick, summer 1962. Choose one of six berths on the working harbour chart, compare the manifest with the quay tally and decide what Tide Mutual owes the merchant.
+Take the night shift on Relay Nine, a fictional orbital cargo station. Its six workshops reconstruct marine insurance files from Ledgerwick in summer 1962. Choose a bay on the illustrated deck, follow the service corridor and decide what Tide Mutual owes each merchant. Spool, the station’s cable reel mechanic, has a different lead for each file.
 
 [Open Paper Harbour](https://thaithinhtim602.github.io/paper-harbour/)
 
-## At the desk
+## On the cargo deck
 
-1. On the light table, drag the blue tally, use the keyboard slider or press **Square the sheets**. Select a cargo mark directly on the manifest to clip it. Open a survey photograph to move a magnifier over the print or turn it over for the case note.
+Select a room on the deck or use the previous and next bay controls. With a room focused, the arrow keys, Home and End work too. Open the selected case to begin. Ask Spool on the deck or at any workbench to hear a lead or jump to the matching exhibit.\n\n1. On the light table, drag the blue tally, use the keyboard slider or press **Square the sheets**. Select a cargo mark directly on the manifest to clip it. Open a survey photograph to move a magnifier over the print or turn it over for the case note.
 2. Work the exhibit and read the papers. Each file has its own instrument, from a salt test or temperature recorder to the captain’s order carbons. Keep up to four passages or readings with the cargo comparisons.
 3. Write the number of units to allow and review the calculated payment. A second action stamps the figures into the book.
 4. Read the audit, examine how a different policy clause changes the entitlement, and open return post in the cash ledger. Six signed summer rulings produce a closing newspaper and a printable bound casebook.
@@ -35,7 +35,7 @@ Stamping a ruling pays cash immediately. At the next summer filing or when the p
 
 The case data and correspondence are in `cases.mjs`. The financial model, durable save validation and wire encodings are in `office.mjs`. Physical exhibits live in `exhibits.mjs`. Tests reconcile the six signed files, exercise generated shipments and exchanged return slips, and run every possible order of the summer casebook under all three treaties.
 
-The chart is an original plan of the fictional port. The mounted Liverpool photograph shows the *Vigilant* taking aboard a gas buoy at Herculaneum Dock. The Mersey Docks and Harbour Board supplied the plate for E. Keble Chatterton’s *Steamships and Their Story*, published by Cassell in 1910. [Original plate and credit](https://www.gutenberg.org/cache/epub/72045/pg72045-images.html#il_102)
+The Relay Nine cutaway and Spool portrait are original illustrations generated for this edition. Their functional bay overlays, animated corridor routes and parcel emblem were created for Paper Harbour. The 1962 files retain their period survey plates and correspondence. The mounted Liverpool photograph shows the *Vigilant* taking aboard a gas buoy at Herculaneum Dock. The Mersey Docks and Harbour Board supplied the plate for E. Keble Chatterton’s *Steamships and Their Story*, published by Cassell in 1910. [Original plate and credit](https://www.gutenberg.org/cache/epub/72045/pg72045-images.html#il_102)
 
-The six game evidence plates and the closing newspaper illustration were generated for the fictional cases. Old Standard TT and DM Serif Text are distributed under the SIL Open Font License. Their notices are in `media/OldStandard-Licence.txt` and `media/Font-Licence.txt`.
+The six game evidence plates and the closing newspaper illustration were generated for the fictional cases. The station uses Barlow and Barlow Condensed. The archive also includes Old Standard TT and DM Serif Text. The SIL Open Font License notices are in `media/Barlow-Licence.txt`, `media/OldStandard-Licence.txt` and `media/Font-Licence.txt`.
 

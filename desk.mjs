@@ -2,6 +2,7 @@ import { CASEBOOK } from "./cases.mjs";
 import { money, claimed, disputed, documents, normalDraft, settlement, unitLoss, audit, allowedToFile, entitlements } from "./office.mjs";
 import { marker, path, next, pair, imagePlate, filed, folio } from "./press.mjs";
 
+import { BERTHS } from "./chart.mjs";
 import { returnDesk } from "./post.mjs";
 import { apparatus } from "./exhibits.mjs";
 
@@ -22,11 +23,12 @@ export function caseRoom(state,file,step,docId="exhibit",whatIf=false,setting={}
   else if(step==="evidence")body=evidence(file,draft,docId,Boolean(entry),setting);
   else if(step==="ruling")body=ruling(file,draft);
   else body=lightTable(file,draft,Boolean(entry));
-  return `<section class="case-room wrap" aria-label="${label}">
-    <a class="backlink" href="${href}">← ${file.wire?"Wire room":"Case register"}</a>
-    <div class="file-heading"><div><p class="eyeline">${marker(file)} <i>·</i> ${file.vessel}</p><h1>${file.title}</h1></div>
-      <button class="pocket-photo" data-action="photograph" data-value="${file.id}" aria-label="Inspect case photograph"><img src="./media/${file.image}.webp" alt=""><span>Survey plate</span></button>
-      <div class="folder-tag"><span>${file.claimant}</span><b>${file.berth}</b></div></div>
+  const bay=BERTHS[file.baseId||file.id];
+  return `<section class="case-room wrap" aria-label="${label}" style="--bay-tone:${bay.color}">
+    <a class="backlink" href="${href}">${file.wire?"Station comms":"Case files"}</a>
+    <div class="file-heading"><div><p class="eyeline"><i class="bay-swatch" aria-hidden="true"></i>Bay ${folio(file.number)} / ${bay.name}</p><h1>${file.title}</h1><p class="origin-tag">${marker(file)} · ${file.vessel}${file.wire?"":" · "+file.date+" 1962"}</p></div>
+      <div class="bench-utilities"><button type="button" class="pocket-photo" data-action="photograph" data-value="${file.id}" aria-label="Inspect case photograph"><img src="./media/${file.image}.webp" alt=""><span>Survey plate</span></button>
+      <button type="button" class="crew-key" data-action="ask-spool"><img src="./media/spool.webp" width="720" height="480" alt=""><span>Ask Spool</span></button></div></div>
     <nav class="file-tabs" aria-label="File sections">${nav}</nav>
     ${body}</section>`;
 }
